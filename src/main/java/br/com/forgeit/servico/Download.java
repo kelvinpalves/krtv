@@ -19,16 +19,18 @@ import org.apache.commons.io.FilenameUtils;
  */
 public class Download {
     
-    public void salvar(String arquivo) throws Exception {
-        System.out.println("Fazendo download do arquivo XML: " + arquivo);
-        
+    private final String FILE_PATH = "/tmp/teste/";
+    
+    public String salvar(String arquivo) throws Exception {
         URL url = new URL(arquivo);
         HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
         urlConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
         
         InputStream in = urlConn.getInputStream();
         
-        Files.copy(in, Paths.get(FilenameUtils.getName(url.getPath())), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(in, Paths.get(FILE_PATH + FilenameUtils.getName(url.getPath())), StandardCopyOption.REPLACE_EXISTING);
+        
+        return FILE_PATH + FilenameUtils.getName(url.getPath());
     }
     
 }

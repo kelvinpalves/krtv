@@ -69,11 +69,21 @@ public class ListaOrigem {
         
         List<ListaOrigemDTO> origemDtoLista = new ArrayList<>();
         
+        int max = 4;
+        int aux = 0;
+        
         for (String local : linhas) {
             
             if (local.trim().length() == 0) {
                 continue;
             }
+            
+            // PARA TESTES USAR ISSO
+//            aux++;
+//            if (aux >= max) {
+//                continue;
+//            }
+            // PARA TESTES USAR ISSO
             
             String auxiliar[] = local.split("CHAVEAUX");
             

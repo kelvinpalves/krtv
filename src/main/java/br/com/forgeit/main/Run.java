@@ -6,8 +6,10 @@
 package br.com.forgeit.main;
 
 import br.com.forgeit.servico.Download;
+import br.com.forgeit.servico.LeitorXML;
 import br.com.forgeit.servico.ListaOrigem;
 import br.com.forgeit.servico.ListaOrigemDTO;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,12 +29,32 @@ public class Run {
             
             Download download = new Download();
             
+            List<String> listaArquivosXML = new ArrayList<>();
+            
             for (ListaOrigemDTO dto : lista) {
                 try {
-                    download.salvar(dto.getUrl());
+                    String arquivo = download.salvar(dto.getUrl());
+                    System.out.println("SUCESSO ao efetuar o download do arquivo, " + dto.getUrl());
+                    listaArquivosXML.add(arquivo);
                 } catch(Exception ex) {
+                    ex.printStackTrace();
                     System.out.println("ERRO ao efetuar o download do arquivo, " + dto.getUrl());
                 }
+            }
+            
+            LeitorXML leitorXML = new LeitorXML();
+            List<String> imagens = new ArrayList<>();
+            
+            for (String arquivo : listaArquivosXML) {
+                try {
+                    imagens.addAll(leitorXML.baixarArquivos(arquivo));
+                } catch (Exception ex) {
+                    System.out.println("Erro ao ler imagens no xml");
+                }
+            }
+            
+            for (String imagem : imagens) {
+                download.salvar(imagem);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
