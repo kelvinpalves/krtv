@@ -19,7 +19,11 @@ import org.apache.commons.io.FilenameUtils;
  */
 public class Download {
     
-    private final String FILE_PATH = "/tmp/teste/";
+    private final String pathArquivos;
+    
+    public Download(String pathArquivos) {
+        this.pathArquivos = pathArquivos;
+    }
     
     public String salvar(String arquivo) throws Exception {
         URL url = new URL(arquivo);
@@ -28,9 +32,9 @@ public class Download {
         
         InputStream in = urlConn.getInputStream();
         
-        Files.copy(in, Paths.get(FILE_PATH + FilenameUtils.getName(url.getPath())), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(in, Paths.get(pathArquivos + FilenameUtils.getName(url.getPath())), StandardCopyOption.REPLACE_EXISTING);
         
-        return FILE_PATH + FilenameUtils.getName(url.getPath());
+        return pathArquivos + FilenameUtils.getName(url.getPath());
     }
     
 }

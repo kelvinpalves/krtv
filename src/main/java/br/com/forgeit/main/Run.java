@@ -5,10 +5,13 @@
  */
 package br.com.forgeit.main;
 
+import br.com.forgeit.config.Configuracao;
 import br.com.forgeit.servico.Download;
 import br.com.forgeit.servico.LeitorXML;
 import br.com.forgeit.servico.ListaOrigem;
 import br.com.forgeit.servico.ListaOrigemDTO;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,14 +23,20 @@ public class Run {
     public static void main (String [] args) {
         
         try {
-            ListaOrigem listaOrigem = new ListaOrigem("http://www.krtv.info/lista/475980.txt");
+            
+            Configuracao configuracao = new Configuracao();
+            
+            File pathArquivos = new File(configuracao.getPathArquivos());
+            Files.createDirectories(pathArquivos.toPath());
+            
+            ListaOrigem listaOrigem = new ListaOrigem(configuracao.getUrlLista());
             listaOrigem.conexaoOK();
             
             System.out.println("Conexão OK");
             
             List<ListaOrigemDTO> lista = listaOrigem.ler();
             
-            Download download = new Download();
+            Download download = new Download(configuracao.getPathArquivos());
             
             List<String> listaArquivosXML = new ArrayList<>();
             
