@@ -19,6 +19,8 @@ import java.util.List;
  * @author kalves
  */
 public class ListaOrigem {
+    
+    final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(ListaOrigem.class);
 
     private final String urlLista;
     private HttpURLConnection urlConn;
@@ -38,7 +40,6 @@ public class ListaOrigem {
                 throw new IOException();
             }
         } catch (IOException e) {
-            e.printStackTrace();
             throw e;
         }
     }
@@ -55,7 +56,6 @@ public class ListaOrigem {
                 sb.append(line.startsWith("#") ? line : "CHAVEAUX" + line);
             }
         } catch (IOException ex) {
-            ex.printStackTrace();
             throw ex;
         }
         
@@ -96,7 +96,7 @@ public class ListaOrigem {
 
                 origemDtoLista.add(dto);
             } else {
-                System.out.println("Linha inválida: " + local);
+                logger.error("linha invalida " + local);
             }
         }
         

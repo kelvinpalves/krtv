@@ -14,60 +14,108 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.log4j.Logger;
 
 /**
  *
  * @author kalves
  */
 public class Run {
-    public static void main (String [] args) {
-        
+
+    final static Logger logger = Logger.getLogger(Run.class);
+
+    public static void main(String[] args) {
+
         try {
+            int maxRepeticaoSemConfiguracao = 0;
+            boolean lerConfiguracao = true;
             
-            Configuracao configuracao = new Configuracao();
+            Configuracao configuracao = null;
             
-            File pathArquivos = new File(configuracao.getPathArquivos());
-            Files.createDirectories(pathArquivos.toPath());
-            
-            ListaOrigem listaOrigem = new ListaOrigem(configuracao.getUrlLista());
-            listaOrigem.conexaoOK();
-            
-            System.out.println("Conexão OK");
-            
-            List<ListaOrigemDTO> lista = listaOrigem.ler();
-            
-            Download download = new Download(configuracao.getPathArquivos());
-            
-            List<String> listaArquivosXML = new ArrayList<>();
-            
-            for (ListaOrigemDTO dto : lista) {
-                try {
-                    String arquivo = download.salvar(dto.getUrl());
-                    System.out.println("SUCESSO ao efetuar o download do arquivo, " + dto.getUrl());
-                    listaArquivosXML.add(arquivo);
-                } catch(Exception ex) {
-                    ex.printStackTrace();
-                    System.out.println("ERRO ao efetuar o download do arquivo, " + dto.getUrl());
+            while(true) {
+                if (lerConfiguracao) {
+                    configuracao = new Configuracao();
+                    lerConfiguracao = false;
                 }
-            }
-            
-            LeitorXML leitorXML = new LeitorXML();
-            List<String> imagens = new ArrayList<>();
-            
-            for (String arquivo : listaArquivosXML) {
-                try {
-                    imagens.addAll(leitorXML.baixarArquivos(arquivo));
-                } catch (Exception ex) {
-                    System.out.println("Erro ao ler imagens no xml");
+                
+                maxRepeticaoSemConfiguracao++;
+                
+                if (maxRepeticaoSemConfiguracao >= 10) {
+                    lerConfiguracao = true;
+                    maxRepeticaoSemConfiguracao = 0;
                 }
-            }
-            
-            for (String imagem : imagens) {
-                download.salvar(imagem);
+                
+                if (configuracao != null) {
+                    servico(configuracao);
+                }
+                
+                Thread.sleep(configuracao.getTaxaAtualizacao() * 60000);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            
         }
-        
+    }
+
+    public static void servico(Configuracao configuracao) throws Exception {
+        File pathArquivos = new File(configuracao.getPathArquivos());
+
+        if (!pathArquivos.exists()) {
+            Files.createDirectories(pathArquivos.toPath());
+        }
+
+        File files[] = pathArquivos.listFiles();
+
+        if (pathArquivos.exists()) {
+            for (File arquivo : files) {
+                arquivo.delete();
+            }
+        }
+
+        files = pathArquivos.listFiles();
+
+        if (files.length == 0) {
+            logger.info("Apagou o path");
+        }
+
+        ListaOrigem listaOrigem = new ListaOrigem(configuracao.getUrlLista());
+        listaOrigem.conexaoOK();
+
+        logger.info("Conectado a listagem de arquivos");
+
+        List<ListaOrigemDTO> lista = listaOrigem.ler();
+
+        Download download = new Download(configuracao.getPathArquivos());
+
+        List<String> listaArquivosXML = new ArrayList<>();
+
+        for (ListaOrigemDTO dto : lista) {
+            try {
+                String arquivo = download.salvar(dto.getUrl());
+                logger.info("Download: " + dto.getUrl());
+                System.out.println();
+                listaArquivosXML.add(arquivo);
+            } catch (Exception ex) {
+                logger.error("Erro Download", ex);
+            }
+        }
+
+        LeitorXML leitorXML = new LeitorXML();
+        List<String> imagens = new ArrayList<>();
+
+        for (String arquivo : listaArquivosXML) {
+            try {
+                logger.info("Inicio Download XML " + arquivo);
+                imagens.addAll(leitorXML.baixarArquivos(arquivo, configuracao.getPathArquivos()));
+                logger.info("Fim Download XML " + arquivo);
+            } catch (Exception ex) {
+                logger.error("Erro Download XML", ex);
+            }
+        }
+
+        for (String imagem : imagens) {
+            logger.info("inicio download imagem" + imagem);
+            download.salvar(imagem);
+            logger.info("fim download imagem" + imagem);
+        }
     }
 }

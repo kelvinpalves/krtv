@@ -20,6 +20,8 @@ public class Configuracao {
     private String urlLista;
     private boolean removerArquivos;
     private Integer taxaAtualizacao;
+    
+    final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Configuracao.class);
 
     public Configuracao() {
         try {
@@ -34,11 +36,10 @@ public class Configuracao {
             String taxaAtualizacaoAuxiliar = props.getProperty("config.taxa_atualizacao");
             taxaAtualizacao = Integer.parseInt(taxaAtualizacaoAuxiliar);
         } catch (IOException ex) {
-            System.out.println("Não foi possível ler as configurações iniciais.");
+            logger.error("Não foi possível ler as configurações iniciais.");
             System.exit(0);
         } catch (NumberFormatException ex) {
-            ex.printStackTrace();
-            System.out.println("Taxa de atualização informada é inválida");
+            logger.error("Não foi possível ler as configurações iniciais.");
             System.exit(0);
         }
     }
