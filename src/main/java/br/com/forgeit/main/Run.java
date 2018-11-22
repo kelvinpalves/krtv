@@ -60,7 +60,8 @@ public class Run {
         File pathArquivos = new File(configuracao.getPathArquivos());
 
         if (!pathArquivos.exists()) {
-            Files.createDirectories(pathArquivos.toPath());
+//            Files.createDirectories(pathArquivos.toPath());
+            return;
         }
 
         File files[] = pathArquivos.listFiles();
