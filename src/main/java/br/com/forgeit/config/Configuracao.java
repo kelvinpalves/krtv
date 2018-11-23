@@ -20,15 +20,24 @@ public class Configuracao {
     private String urlLista;
     private boolean removerArquivos;
     private Integer taxaAtualizacao;
-    
+
     final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Configuracao.class);
+    private static String OS = System.getProperty("os.name").toLowerCase();
 
     public Configuracao() {
         try {
             Properties props = new Properties();
-            FileInputStream file = new FileInputStream("src/main/resources/configuracao.properties");
-            props.load(file);
             
+            FileInputStream file = null;
+            
+            if (isWindows()) {
+                file = new FileInputStream("C:\\krtv\\configuracao.properties");
+            } else {
+                file = new FileInputStream("/home/kelvin/configuracao.properties");
+            }
+            
+            props.load(file);
+
             idCliente = props.getProperty("config.id_cliente");
             pathArquivos = props.getProperty("config.path_arquivos");
             urlLista = props.getProperty("config.url_lista");
@@ -42,6 +51,10 @@ public class Configuracao {
             logger.error("Não foi possível ler as configurações iniciais.");
             System.exit(0);
         }
+    }
+
+    public static boolean isWindows() {
+        return (OS.indexOf("win") >= 0);
     }
 
     public String getIdCliente() {
