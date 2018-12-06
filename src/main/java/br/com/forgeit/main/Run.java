@@ -24,7 +24,6 @@ public class Run {
     final static Logger logger = Logger.getLogger(Run.class);
 
     public static void main(String[] args) {
-
         try {
             int maxRepeticaoSemConfiguracao = 0;
             boolean lerConfiguracao = true;
@@ -51,30 +50,18 @@ public class Run {
                 Thread.sleep(configuracao.getTaxaAtualizacao() * 60000);
             }
         } catch (Exception ex) {
-            
+            ex.printStackTrace();
         }
     }
 
     public static void servico(Configuracao configuracao) throws Exception {
         File pathArquivos = new File(configuracao.getPathArquivos());
+        
+        logger.info(configuracao.getPathArquivos());
 
         if (!pathArquivos.exists()) {
-//            Files.createDirectories(pathArquivos.toPath());
+            logger.warn(configuracao.getPathArquivos() + " nao encontrado");
             return;
-        }
-
-        File files[] = pathArquivos.listFiles();
-
-        if (pathArquivos.exists()) {
-            for (File arquivo : files) {
-                arquivo.delete();
-            }
-        }
-
-        files = pathArquivos.listFiles();
-
-        if (files.length == 0) {
-            logger.info("Apagou o path");
         }
 
         ListaOrigem listaOrigem = new ListaOrigem(configuracao.getUrlLista());
@@ -87,13 +74,14 @@ public class Run {
         Download download = new Download(configuracao.getPathArquivos());
 
         List<String> listaArquivosXML = new ArrayList<>();
+        List<String> listaParaValidarArquivos = new ArrayList<>();
 
         for (ListaOrigemDTO dto : lista) {
             try {
                 String arquivo = download.salvar(dto.getUrl());
                 logger.info("Download: " + dto.getUrl());
-                System.out.println();
                 listaArquivosXML.add(arquivo);
+                listaParaValidarArquivos.add(arquivo);
             } catch (Exception ex) {
                 logger.error("Erro Download", ex);
             }
@@ -101,7 +89,7 @@ public class Run {
 
         LeitorXML leitorXML = new LeitorXML();
         List<String> imagens = new ArrayList<>();
-
+        
         for (String arquivo : listaArquivosXML) {
             try {
                 logger.info("Inicio Download XML " + arquivo);
@@ -111,11 +99,57 @@ public class Run {
                 logger.error("Erro Download XML", ex);
             }
         }
-
+        
+        
         for (String imagem : imagens) {
             logger.info("inicio download imagem" + imagem);
-            download.salvar(imagem);
+            listaParaValidarArquivos.add(download.salvar(imagem));
             logger.info("fim download imagem" + imagem);
         }
+        
+        File[] files = pathArquivos.listFiles();
+        System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n");
+        
+        List<String> listaArquivosPath = new ArrayList<>();
+        
+        for (File file : files) {
+            listaArquivosPath.add(file.getAbsolutePath());
+        }
+        
+        for (String servidor : listaArquivosPath) {
+            System.out.println("ARQUIVO NA PASTA: " + servidor);
+        }
+        
+        for (String xml : listaParaValidarArquivos) {
+            System.out.println("ARQUIVO NO XML:" + xml);
+        }
+        
+        for (String servidor : listaArquivosPath) {
+            boolean existe = false;
+            
+            for (String arquivo : listaParaValidarArquivos) {
+                
+                if (servidor.equals(arquivo)) {
+                    existe = true;
+                }
+                
+            }
+            
+            if (!existe) {
+                logger.info("Vou apagar o arquivo: " + servidor);
+                new File(servidor).delete();
+            }
+        }
+        
+//        System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n");
+//        for (String arquivo : listaParaValidarArquivos) {
+//            System.out.println(arquivo);
+//        }
+//        System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n");
+
+
+
+
+
     }
 }

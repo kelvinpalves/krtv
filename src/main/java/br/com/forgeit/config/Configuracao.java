@@ -30,6 +30,8 @@ public class Configuracao {
             
             FileInputStream file = null;
             
+            logger.info(OS);
+            
             if (isWindows()) {
                 file = new FileInputStream("C:\\krtv\\configuracao.properties");
             } else {
@@ -38,17 +40,17 @@ public class Configuracao {
             
             props.load(file);
 
-            idCliente = props.getProperty("config.id_cliente");
-            pathArquivos = props.getProperty("config.path_arquivos");
-            urlLista = props.getProperty("config.url_lista");
-            removerArquivos = props.getProperty("config.remover_arquivos").equals("true");
-            String taxaAtualizacaoAuxiliar = props.getProperty("config.taxa_atualizacao");
+            idCliente = props.getProperty("config.id_cliente").trim();
+            pathArquivos = props.getProperty("config.path_arquivos").trim();
+            urlLista = props.getProperty("config.url_lista").trim();
+            removerArquivos = props.getProperty("config.remover_arquivos").trim().equals("true");
+            String taxaAtualizacaoAuxiliar = props.getProperty("config.taxa_atualizacao").trim();
             taxaAtualizacao = Integer.parseInt(taxaAtualizacaoAuxiliar);
         } catch (IOException ex) {
-            logger.error("Não foi possível ler as configurações iniciais.");
+            logger.error("Não foi possível ler as configurações iniciais.", ex);
             System.exit(0);
         } catch (NumberFormatException ex) {
-            logger.error("Não foi possível ler as configurações iniciais.");
+            logger.error("Não foi possível ler as configurações iniciais.", ex);
             System.exit(0);
         }
     }
