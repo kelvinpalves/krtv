@@ -14,4 +14,5 @@ echo config.path_arquivos = C:\Users\%id_cliente%\AppData\Roaming\SignagePlayer.
 echo config.url_lista = http://www.krtv.info/lista/%id_cliente%.txt >> C:\krtv\configuracao.properties
 echo config.id_cliente = %id_cliente% >> C:\krtv\configuracao.properties
 
+
 pause

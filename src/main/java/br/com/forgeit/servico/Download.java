@@ -11,6 +11,8 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -26,6 +28,12 @@ public class Download {
     }
     
     public String salvar(String arquivo) throws Exception {
+        
+        SimpleDateFormat sdf = new SimpleDateFormat("ddMMYYYYhhmmss");
+        String urlCache = arquivo + '?' + sdf.format(new Date());
+        
+        arquivo = urlCache;
+        
         URL url = new URL(arquivo);
         HttpURLConnection urlConn = (HttpURLConnection) url.openConnection();
         urlConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");

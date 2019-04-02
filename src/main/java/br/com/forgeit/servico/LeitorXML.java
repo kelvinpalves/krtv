@@ -38,7 +38,7 @@ public class LeitorXML {
         Document doc = dBuilder.parse(fXmlFile);
 
         doc.getDocumentElement().normalize();
-
+        
         NodeList channels = doc.getElementsByTagName("item");
         
         boolean precisaSalvar = false;
@@ -48,7 +48,9 @@ public class LeitorXML {
             
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
                 Element eElement = (Element) nNode;
+                
                 String imagem = eElement.getElementsByTagName("photo").item(0).getTextContent();
+
                 retorno.add(imagem);
                 eElement.getElementsByTagName("photo").item(0).setTextContent(path + lerNomeByURL(imagem));
                 precisaSalvar = true;
@@ -63,8 +65,13 @@ public class LeitorXML {
                 tr.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
                 tr.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, "roles.dtd");
                 tr.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-
-                tr.transform(new DOMSource(doc), new StreamResult(new FileOutputStream(xml)));
+                
+                FileOutputStream fileOutputStream = new FileOutputStream(xml);
+                StreamResult streamResult = new StreamResult(fileOutputStream);
+                
+                tr.transform(new DOMSource(doc), streamResult);
+                
+                fileOutputStream.close();
             } catch (Exception ex) {
                 logger.error("Erro ler ou salvar xml", ex);
             }

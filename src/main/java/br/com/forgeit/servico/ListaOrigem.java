@@ -11,7 +11,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,17 +28,23 @@ public class ListaOrigem {
     private HttpURLConnection urlConn;
 
     public ListaOrigem(String url) {
-        this.urlLista = url;
+        SimpleDateFormat sdf = new SimpleDateFormat("ddMMYYYYhhmmss");
+        String urlListaCache = url + '?' + sdf.format(new Date());
+        this.urlLista = urlListaCache;
     }
 
     public void conexaoOK() throws IOException {
         try {
+            System.out.println(this.urlLista);
             URL url = new URL(this.urlLista);
             urlConn = (HttpURLConnection) url.openConnection();
             urlConn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
             urlConn.connect();
             
+            System.out.println(urlConn.getResponseCode());
+            
             if (urlConn.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                System.out.println(urlConn.getResponseCode());
                 throw new IOException();
             }
         } catch (IOException e) {

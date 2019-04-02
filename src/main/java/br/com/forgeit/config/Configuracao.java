@@ -5,7 +5,10 @@
  */
 package br.com.forgeit.config;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -13,7 +16,7 @@ import java.util.Properties;
  *
  * @author kalves
  */
-public class Configuracao {
+public final class Configuracao {
 
     private String idCliente;
     private String pathArquivos;
@@ -24,35 +27,94 @@ public class Configuracao {
     final static org.apache.log4j.Logger logger = org.apache.log4j.Logger.getLogger(Configuracao.class);
     private static String OS = System.getProperty("os.name").toLowerCase();
 
-    public Configuracao() {
+    public Configuracao() throws Exception {
         try {
-            Properties props = new Properties();
-            
-            FileInputStream file = null;
-            
-            logger.info(OS);
-            
-            if (isWindows()) {
-                file = new FileInputStream("C:\\krtv\\configuracao.properties");
-            } else {
-                file = new FileInputStream("/home/kelvin/configuracao.properties");
-            }
-            
-            props.load(file);
+            Properties props = getConfiguracao();
 
-            idCliente = props.getProperty("config.id_cliente").trim();
-            pathArquivos = props.getProperty("config.path_arquivos").trim();
-            urlLista = props.getProperty("config.url_lista").trim();
-            removerArquivos = props.getProperty("config.remover_arquivos").trim().equals("true");
+            String pathInicial = props.getProperty("config.path_inicial").trim();
+
+            definirVariaveis(pathInicial);
+
+            urlLista = props.getProperty("config.url_lista").trim() + idCliente + ".txt";
+
             String taxaAtualizacaoAuxiliar = props.getProperty("config.taxa_atualizacao").trim();
             taxaAtualizacao = Integer.parseInt(taxaAtualizacaoAuxiliar);
-        } catch (IOException ex) {
+            taxaAtualizacao = 10;
+
+            logger.info(urlLista);
+            logger.info(idCliente);
+            logger.info(pathArquivos);
+
+        } catch (Exception ex) {
             logger.error("Não foi possível ler as configurações iniciais.", ex);
-            System.exit(0);
-        } catch (NumberFormatException ex) {
-            logger.error("Não foi possível ler as configurações iniciais.", ex);
-            System.exit(0);
+            throw ex;
         }
+    }
+
+    public Properties getConfiguracao() throws FileNotFoundException, IOException {
+        Properties props = new Properties();
+        FileInputStream file = null;
+
+        if (isWindows()) {
+            file = new FileInputStream("C:\\krtv\\configuracao.properties");
+        } else {
+            file = new FileInputStream("/home/kelvin/configuracao.properties");
+        }
+
+        props.load(file);
+
+        return props;
+    }
+
+    public void definirVariaveis(String pathInicial) throws Exception {
+        String usuario = System.getProperty("user.home");
+        
+        File file = new File(usuario + "/AppData/Roaming");
+        
+        System.out.println("Path parcial: " + file.getAbsolutePath());
+        
+        String[] directories = file.list(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+            }
+        });
+
+        String parcial = file.getAbsolutePath();
+
+        for (String diretorio : directories) {
+            if (diretorio.startsWith("SignagePlayer.")) {
+                parcial += File.separator + diretorio;
+            }
+        }
+
+        parcial += File.separator + "Local Store" + File.separator + "signage.me";
+        
+        System.out.println(parcial);
+
+        String[] proximos = new File(parcial).list(new FilenameFilter() {
+            @Override
+            public boolean accept(File current, String name) {
+                return new File(current, name).isDirectory();
+            }
+        });
+
+        for (String diretorio : proximos) {
+            if (diretorio.startsWith("business")) {
+                parcial += File.separator + diretorio;
+                idCliente = diretorio.replace("business", "");
+            }
+        }
+
+        parcial += File.separator + "Resources";
+
+        File salvarAqui = new File(parcial);
+
+        if (salvarAqui.exists()) {
+            System.out.println("Encontrei o path " + parcial);
+        }
+        
+        pathArquivos = parcial + File.separator;
     }
 
     public static boolean isWindows() {
